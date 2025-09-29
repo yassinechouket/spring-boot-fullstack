@@ -33,13 +33,18 @@ build-image-pull: build-image-login
 	docker image pull $(BUILD_IMAGE):$(GIT_SHA)
 
 # --------------------
+# Run Flyway migrations locally
+# --------------------
+migrate:
+	mvn flyway:migrate
+
+# --------------------
 # Run migrations inside Docker
 # --------------------
 build-image-migrate:
 	$env:DOCKERIZE_URL = "tcp://localhost:5432"; \
 	docker container run --entrypoint "dockerize" --network "host" --rm $(BUILD_IMAGE):$(GIT_SHA) -timeout 30s -wait $$env:DOCKERIZE_URL; \
 	docker container run --rm --network "host" $(BUILD_IMAGE):$(GIT_SHA) java -jar app.jar --spring.profiles.active=migration
-
 
 
 # --------------------
