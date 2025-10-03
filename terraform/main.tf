@@ -1,4 +1,4 @@
-# we cerate an env here !!!
+# we cerate an env here , as IAM !!!
 module "staging" {
   source = "./module/environment"
 
