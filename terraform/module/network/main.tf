@@ -13,6 +13,20 @@ module "subnets" {
     ]
   ])
 }
+/*
+result ->
+networks = [
+  { name = "database-eu-west-3a", new_bits = 6 },
+  { name = "database-eu-west-3b", new_bits = 6 },
+  { name = "elasticache-eu-west-3a", new_bits = 6 },
+  { name = "elasticache-eu-west-3b", new_bits = 6 },
+  { name = "intra-eu-west-3a", new_bits = 5 },
+  { name = "intra-eu-west-3b", new_bits = 5 },
+  { name = "private-eu-west-3a", new_bits = 3 },
+  { name = "private-eu-west-3b", new_bits = 3 },
+  { name = "public-eu-west-3a", new_bits = 5 },
+  { name = "public-eu-west-3b", new_bits = 5 },
+]*/
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
