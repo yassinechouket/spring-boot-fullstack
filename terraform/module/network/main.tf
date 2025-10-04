@@ -13,20 +13,6 @@ module "subnets" {
     ]
   ])
 }
-/*
-result ->
-networks = [
-  { name = "database-eu-west-3a", new_bits = 6 },
-  { name = "database-eu-west-3b", new_bits = 6 },
-  { name = "elasticache-eu-west-3a", new_bits = 6 },
-  { name = "elasticache-eu-west-3b", new_bits = 6 },
-  { name = "intra-eu-west-3a", new_bits = 5 },
-  { name = "intra-eu-west-3b", new_bits = 5 },
-  { name = "private-eu-west-3a", new_bits = 3 },
-  { name = "private-eu-west-3b", new_bits = 3 },
-  { name = "public-eu-west-3a", new_bits = 5 },
-  { name = "public-eu-west-3b", new_bits = 5 },
-]*/
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
@@ -50,3 +36,35 @@ module "vpc" {
     }
   ]
 }
+
+/*
+public_subnets = [
+  "10.0.1.0/24",  # from public-eu-west-3a
+  "10.0.2.0/24"   # from public-eu-west-3b
+]*/
+
+
+/*
+result ->
+networks = [
+  { name = "database-eu-west-3a", new_bits = 6 },
+  { name = "database-eu-west-3b", new_bits = 6 },
+  { name = "elasticache-eu-west-3a", new_bits = 6 },
+  { name = "elasticache-eu-west-3b", new_bits = 6 },
+  { name = "intra-eu-west-3a", new_bits = 5 },
+  { name = "intra-eu-west-3b", new_bits = 5 },
+  { name = "private-eu-west-3a", new_bits = 3 },
+  { name = "private-eu-west-3b", new_bits = 3 },
+  { name = "public-eu-west-3a", new_bits = 5 },
+  { name = "public-eu-west-3b", new_bits = 5 },
+]
+and module.subnets.network_cidr_blocks = {
+  "database-eu-west-3a"    = "10.0.0.0/22"
+  "database-eu-west-3b"    = "10.0.4.0/22"
+  "public-eu-west-3a"      = "10.0.20.0/24"
+  "public-eu-west-3b"      = "10.0.21.0/24"
+  ...
+}*/
+
+
+

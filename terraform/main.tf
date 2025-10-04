@@ -6,6 +6,3 @@ module "staging" {
   name            = "staging"
 }
 
-# just to test
-
-#another test plz work
