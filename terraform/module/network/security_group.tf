@@ -110,3 +110,50 @@ resource "aws_vpc_security_group_ingress_rule" "elasticache_allow_private" {
   security_group_id            = module.security_group_elasticache.security_group_id
   to_port                      = 6379
 }
+
+
+
+
+
+
+/*What is the key advantage of using security group IDs instead of specific CIDR blocks or IP addresses?
+What is the key advantage of using security group IDs instead of specific CIDR blocks or IP addresses?
+Using security group IDs allows for more abstract and flexible network rules that
+are not tied to specific IP addresses, making network configurations more adaptable and easier to manage
+🟢 Real-world example
+
+Imagine you have:
+
+🟦 App servers (security group sg-app)
+
+🟧 DB servers (security group sg-db)
+
+You want only app servers to talk to DB servers on port 5432.
+
+❌ If you use CIDR blocks:
+
+You’d have to:
+
+Know the private IP range of the app servers.
+
+Add that CIDR manually in DB’s security group.
+
+If the app servers scale up/down or move, you must update the rules.
+
+Messy.
+
+✅ If you use security group IDs:
+
+On the DB security group, you simply say:
+
+“Allow inbound 5432 from sg-app.”
+
+Done ✅
+
+New app servers join → automatically allowed.
+
+Old app servers terminated → automatically removed.
+
+IP addresses change? Doesn’t matter.
+
+This is abstract and flexible because it depends on membership in a group, not on fixed IPs.*/
