@@ -199,3 +199,241 @@ Terraform automates subnet creation for each AZ to give you redundancy.
 
 
 
+Root Module (Terraform root)
+┌─────────────────────────────┐
+│ module "dev_env"            │
+│ ┌─────────────────────────┐ │
+│ │ source = "./modules/env" ││
+│ │ bastion_ingress = [      │
+│ │   "203.0.113.5/32",      ││  <-- User specifies which IPs
+│ │   "198.51.100.10/32"     ││
+│ │ ]                        ││
+│ │ name = "dev"             ││
+│ └─────────────────────────┘ │
+└───────────────┬─────────────┘
+                │
+                ▼
+Environment Module (`modules/env`)
+┌─────────────────────────────┐
+│ module "network"             │
+│ ┌─────────────────────────┐ │
+│ │ source = "../network"   │ │
+│ │ bastion_ingress = var.bastion_ingress  │  <-- Passed down
+│ │ name = var.name          │ │
+│ │ cidr = "10.0.0.0/16"    │ │
+│ │ availability_zones = ["eu-west-3a", ...] │
+│ └─────────────────────────┘ │
+└───────────────┬─────────────┘
+                │
+                ▼
+Network Module (`modules/network`)
+┌─────────────────────────────┐
+│ resource "aws_security_group" "bastion_sg" │
+│ ingress {                                  │
+│   from_port   = 22                          │
+│   to_port     = 22                          │
+│   protocol    = "tcp"                        │
+│   cidr_blocks = var.bastion_ingress  <-- Used here │
+│ }                                           │
+└─────────────────────────────┘
+                │
+                ▼
+AWS Security Group for Bastion
+- Only allows SSH from the IPs specified in `bastion_ingress`
+
+
+
+
+
+
+1. Resource = A Single Piece of Infrastructure
+
+A resource in Terraform represents one specific infrastructure component (e.g., EC2 instance, S3 bucket, VPC, etc.).
+It is the lowest-level building block.
+
+📌 Example: AWS EC2 instance resource
+resource "aws_instance" "web_server" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "WebServer"
+  }
+}
+
+
+✅ This creates one EC2 instance.
+Terraform will manage its lifecycle (create, update, delete) directly.
+
+📦 2. Module = A Container / Group of Resources
+
+A module is a collection of resources that are grouped together to achieve a higher-level functionality.
+Think of it like a function in programming — you can reuse it multiple times instead of writing the same resources over and over.
+
+Modules can contain:
+
+Multiple resource blocks
+
+variables, outputs, locals
+
+Even other modules (nested)
+
+📌 Example: Using a VPC module
+module "vpc" {
+  source = "terraform-aws-modules/vpc/aws"
+  version = "5.0.0"
+
+  name = "my-vpc"
+  cidr = "10.0.0.0/16"
+
+  azs             = ["eu-west-3a", "eu-west-3b"]
+  private_subnets = ["10.0.1.0/24", "10.0.2.0/24"]
+  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24"]
+}
+
+
+✅ Here:
+
+The module creates multiple underlying resources: VPC, subnets, route tables, gateways, etc.
+
+You don’t need to define each resource manually — the module handles it for you.
+
+The module acts like a reusable “package”.
+
+🧠 Key Differences Table
+Feature	Resource 🧱	Module 📦
+Definition	A single piece of infrastructure	A container that groups multiple resources
+Purpose	To manage a specific component	To reuse, organize, and group related resources
+Example	aws_instance, aws_s3_bucket	terraform-aws-modules/vpc/aws
+Reusability	Usually defined once	Can be reused across projects or multiple times in one file
+Complexity	Simple	Can be simple or complex
+Who writes it	Usually you	Can be you or the community (Terraform Registry modules)
+🧠 Analogy
+
+Think of Terraform code like building a house:
+
+🧱 Resources = the individual bricks, windows, doors, or wires.
+
+📦 Modules = the pre-designed rooms (e.g., kitchen module, bathroom module) built from those bricks.
+
+You can build the house by placing each brick manually (resources), or by using prebuilt rooms (modules) to speed up the process and stay organized.
+
+📝 Bonus: You Can Create Your Own Modules
+
+For example, you could put your own reusable configuration in a folder:
+
+modules/
+  ec2-instance/
+    main.tf
+    variables.tf
+    outputs.tf
+
+
+Then use it like:
+
+module "app_server" {
+  source = "./modules/ec2-instance"
+  instance_type = "t3.micro"
+}
+
+✅ Summary:
+
+Resource = single infrastructure item (atomic unit).
+
+Module = reusable collection of resources, like a function or package.
+
+Modules help you organize, reuse, and standardize Terraform code.
+
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+🔹 First, what is “resource creation sequencing”?
+
+When Terraform creates resources (like servers, databases, networks, etc.),
+some of them depend on others.
+
+Example:
+
+You must create a VPC (network) before creating an EC2 instance inside it.
+
+You must create an S3 bucket before uploading files to it.
+
+So Terraform must know in what order to create things.
+
+🔹 Terraform’s solution: the Directed Acyclic Graph (DAG)
+
+Terraform automatically builds a Directed Acyclic Graph (DAG) of your resources.
+
+Let’s break this term:
+
+Directed → the arrows show which resources depend on which.
+Example: VPC → Subnet → EC2 Instance
+(meaning: the subnet depends on the VPC, and the EC2 depends on the subnet)
+
+Acyclic → there are no loops.
+You can’t have a circular dependency like A depends on B and B depends on A.
+
+So Terraform draws a map of all resources and their dependencies.
+
+🔹 Then it uses a topological sort algorithm
+
+This is a fancy way to say:
+
+Terraform looks at the graph and automatically figures out which resources can be created first, and which must wait for others.
+
+Example:
+
+resource "aws_vpc" "main" { ... }
+resource "aws_subnet" "subnet1" { vpc_id = aws_vpc.main.id }
+resource "aws_instance" "web" { subnet_id = aws_subnet.subnet1.id }
+
+
+Terraform will:
+
+Create the VPC first (no dependencies)
+
+Then the Subnet (depends on the VPC)
+
+Then the Instance (depends on the Subnet)
+
+You don’t need to tell Terraform this — it understands automatically from the references.
+
+🔹 If automatic sequencing fails → use depends_on
+
+Sometimes Terraform can’t detect a dependency automatically (for example, with indirect dependencies).
+
+In that case, you can manually tell Terraform the order using depends_on.
+
+Example:
+
+resource "aws_instance" "app" {
+  ami           = "ami-123"
+  instance_type = "t2.micro"
+  depends_on    = [aws_s3_bucket.bucket]
+}
+
+
+This tells Terraform:
+
+“Do not create the EC2 instance until the S3 bucket is ready.”
+
+💡 Summary
+Concept	Explanation
+DAG (Directed Acyclic Graph)	A map of all resources and their dependencies
+Topological Sort	Algorithm that finds the correct order to create resources
+Automatic Sequencing	Terraform figures out dependencies from your code
+depends_on	Manual way to tell Terraform which resource must come first
+✅ In short:
+
+Terraform builds a dependency graph (DAG), sorts it to know what to create first, and automatically handles the order.
+If Terraform can’t figure it out, you can help it by adding depends_on.
+
+
+
+
+
+
