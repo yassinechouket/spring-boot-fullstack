@@ -1,3 +1,3 @@
 locals {
-  bastion_ingress = ["<ip-@> /32"]
+  bastion_ingress = ["41.62.69.42 /32"]
 }
