@@ -437,3 +437,59 @@ If Terraform can’t figure it out, you can help it by adding depends_on.
 
 
 
+---------------------------------------------------------------------------
+
+bastion_ingress
+variable "bastion_ingress" {
+  default     = []
+  description = "List of CIDR blocks to whitelist for bastion host"
+  type        = list(string)
+}
+
+🧠 Explanation
+
+This variable is a list of CIDR blocks (IP ranges) that are allowed to access your Bastion host (via SSH typically).
+
+“Whitelisting” means only IPs in these CIDR blocks are allowed to connect.
+
+If not provided, it defaults to an empty list [], meaning no external access unless specified.
+
+📝 Example usage
+
+In terraform.tfvars:
+
+bastion_ingress = ["192.168.1.0/24", "203.0.113.45/32"]
+
+
+In a security group rule:
+
+module "security_group_bastion" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "5.3.0"
+
+  name        = "${var.name}-bastion"
+  description = "Security group for bastion host"
+  vpc_id      = aws_vpc.main.id
+
+  ingress_with_cidr_blocks = [
+    for cidr in var.bastion_ingress : {
+      rule        = "ssh-tcp"
+      cidr_blocks = cidr
+    }
+  ]
+}
+
+
+👉 This allows SSH access only from the specified IPs (e.g., your office or home network).
+
+
+
+
+
+
+
+
+
+
+
+
