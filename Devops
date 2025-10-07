@@ -1,0 +1,16 @@
+1 -> Deployment Strategies for Any App
+     From startup to scale, deploy containers to AWS using the infrastructure your team requires.
+      Get your app line fast with AWS App Runner.
+      Evolve your CI/CD pipeline to ECS with Terraform, and manage your infrastructure with code.
+
+ 2 -> Automation and Optimization
+      A growing team and application need automation. Add database migrations and a makefile for improved developer ergonomics.
+       Optimize the container with multi-stage Docker builds for faster deployments.
+
+
+3 -> Build a Deployment Pipeline
+     Master GitHub Actions. Configure blue/green deployments for multiple environments.
+      Use branches and tags to promote successful deployments to production and ship confidently with a robust CI/CD pipeline.
+
+4 -> Migrate your database to RDS. Scale your application with ECS clusters, load balancing, and a CloudFront CDN.
+    Learn the infrastructure required to ship high-performance enterprise applications.
