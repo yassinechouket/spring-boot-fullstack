@@ -9,6 +9,7 @@ module "network" {
 
 
 module "database" {
+
   source = "../database"
 
   security_groups = [module.network.database_security_group]
@@ -16,3 +17,7 @@ module "database" {
   name            = var.name
   vpc_name        = module.network.vpc_name
 }
+
+
+
+

@@ -15,8 +15,8 @@ module "this" {
   source  = "terraform-aws-modules/rds/aws"
   version = "6.12.0"
 
-  allocated_storage                   = 4
-  max_allocated_storage               = 8
+  allocated_storage                   = 20
+  max_allocated_storage               = 20
   create_db_option_group              = false
   create_db_parameter_group           = false
   create_db_subnet_group              = false
