@@ -10,12 +10,12 @@ resource "aws_ecs_cluster" "this" {
 resource "aws_iam_role" "this" {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
   name               = var.name
-}
+}// -> Allow EC2 service to assume this role
 
 resource "aws_iam_role_policy_attachment" "service_role" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
   role       = aws_iam_role.this.name
-}
+} // -> Without this, the ECS Agent on EC2 can’t talk to ECS.
 
 resource "aws_iam_instance_profile" "this" {
   name = var.name
@@ -153,4 +153,3 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
   capacity_providers = [for provider_name, provider in var.capacity_providers : aws_ecs_capacity_provider.this[provider_name].name]
   cluster_name       = var.name
 }
-/*...*/
